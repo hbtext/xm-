@@ -4,164 +4,125 @@
 		<meta charset="UTF-8">
 		<title></title>
 		<style>
-			ul{
-				margin:0;
-				padding:0;
-				list-style: none;
-				width: 660px;
-				margin:50px auto;
+			#box{
+				width: 800px;
+				height: 450px;
+				margin: 50px auto;
+				border: 1px solid #000;
+				position: relative;
 			}
+			
 			li{
-				width: 150px;
-				height: 150px;
-				border:2px solid #fff;
-				float: left;
-				background-size: 100%;
-				margin-right:10px;
-				margin-bottom: 10px;
+				position: absolute;
+				list-style: none;
+			}
+			#input1,#input2{
+				border-radius: 20px;
+				margin:0 auto;
+				
+				
+			}
+			#input1{
+				margin-left: 40%;
+			}
+			a{
+				text-decoration: none;
+				width: 50px;
+				height: 50px;
+				position: absolute;
+				top:250px;
+				margin-top: -25px;
+				background-color: #ccc;
+				border-radius: 50%;
+				line-height: 50px;
+				text-align: center;
+				color:white;
+				font-size: 40px;
+			}
+			ul{
+				width: 800px;
+				height: 450px;
+				margin:0 auto;
+				padding:0;	
+				position:relative;
+				overflow: hidden;
+			}
+			#prev{
+				left:20px;
+			}
+			#next{
+				right:20px;
 			}
 		</style>
+			
 	</head>
 	<body>
-		<input type="button" value="随机排序" id="btn"/>
-		<ul>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-		</ul>
-		<script src="move4.js"></script>
-		<script>
-			var btn = document.getElementById('btn');
-			var lis = document.getElementsByTagName('li');
+		<!--<input type="button" value="交叉" id="input1"/>
+		<input type="button" value="条状掉落" id="input2" />-->
+		<a href="javascript:;" id="prev"><</a>
+		<div id="box">
 			
-			var arr = [];//存碰撞的li
-			//布局转化
-			for(var i=0;i<lis.length;i++){
-				lis[i].style.backgroundImage = 'url(img/'+(i+1)+'.jpg)';
-				lis[i].style.left = lis[i].offsetLeft + 'px';
-				lis[i].style.top = lis[i].offsetTop + 'px';
-				//自定义属性l,t记录自己的位置
-				lis[i].l = lis[i].offsetLeft;
-				lis[i].t = lis[i].offsetTop;
+			<ul>
+				<!--<li></li>-->
+			</ul>
+			
+		</div>
+		<a href="javascript:;" id="next">></a>
+		
+		
+		<script src="move3.js"></script>
+		<script>
+			var box = document.getElementById('box');
+			var prev = document.getElementById('prev');
+			var next = document.getElementById('next');
+			var inps = document.getElementsByTagName('input');
+			var ul = document.getElementsByTagName('ul')[0];
+			var arr = ['img/1.jpg','img/2.jpg','img/3.jpg','img/4.jpg','img/5.jpg'];
+			var n=0;
+			var str = '';
+			for(var i=0;i<50;i++){
+				str +='<li style="width:10%;height:20%;background-position:'+(-(i%10)*80)+'px '+Math.floor(i/10)*-90+'px;top:'+Math.floor(i/10)*90+'px;left:'+(i%10)*80+'px"></li>'
 			}
-			for(var i=0;i<lis.length;i++){
-				lis[i].style.position = 'absolute';
-				lis[i].style.margin = 0;
-				drag(lis[i]);
-			}
-			//拖拽
-			function drag(obj){
-				obj.onmousedown = function(e){
-					obj.style.zIndex = 10;
-					var disX = e.clientX - obj.offsetLeft;
-					var disY = e.clientY - obj.offsetTop;
-					document.onmousemove = function(e){
-						
-						var l = e.clientX - disX;
-						var t = e.clientY - disY;
-						if (l < 0) {
-                            l = 0;
-                        } else if (l > window.innerWidth - obj.offsetWidth) {
-                            l = window.innerWidth - obj.offsetWidth;
-                        }
-                        if (t < 0) {
-                            t = 0;
-                        } else if (t > window.innerHeight - obj.offsetHeight) {
-                            t = window.innerHeight - obj.offsetHeight;
-                        }
-						obj.style.left = l + 'px';
-						obj.style.top = t + 'px';
-						//先清除arr和边框
-						for(var i=0;i<arr.length;i++){
-							arr[i].style.borderColor = '';
-						}
-						arr = [];
-						//move鼠标移动的时候，碰到的li放入arr里
-						for(var i=0;i<lis.length;i++){
-							//自己跳过
-							if(lis[i] === obj){
-								continue;
-							}
-							//碰到的放入数组，边框变色
-							if(duang(obj,lis[i])){
-								arr.push(lis[i]);
-								lis[i].style.borderColor = 'red';
-							}
-						}
-					}
-					document.onmouseup = function(e){
-						obj.style.zIndex = '';
-						var x = e.clientX;
-						var y = e.clientY;
-						var min = 9999999;
-						var ele = null;
-						//如果arr长度为0，证明没碰上，回到原来自己的位置
-						if(arr.length == 0){
-							move(obj,{left:obj.l,top:obj.t},500,'easeBoth');
-						}else{
-							for(var i=0;i<arr.length;i++){
-								arr[i].style.borderColor = '';
-							}
-							//在arr里（碰到的li），计算出中心距离最短的，互换位置
-							for(var i=0;i<arr.length;i++){
-								var L = Math.abs(x-(arr[i].offsetLeft + arr[i].offsetWidth/2));
-								var T = Math.abs(y-(arr[i].offsetTop + arr[i].offsetHeight/2));
-								var d = Math.sqrt(L*L + T*T);
-								if(d < min){
-									min = d;
-									ele = arr[i];
-								}
-							}
-							move(obj,{left:ele.l,top:ele.t},500,'easeBoth');
-							move(ele,{left:obj.l,top:obj.t},500,'easeBoth',function(){
-								//换完位置，重新记录当前坐标
-								ele.l = ele.offsetLeft;
-								ele.t = ele.offsetTop;
-								obj.l = obj.offsetLeft;
-								obj.t = obj.offsetTop;
-							});
-						}
-						document.onmousemove = document.onmouseup = null;
-					}
-					return false;
+			ul.innerHTML = str;
+			ul.style.backgroundImage = 'url('+arr[n]+')';
+			var lis = document.getElementsByTagName('li');
+			prev.onclick = function(){
+				ul.style.backgroundImage = 'url('+arr[n]+')'
+				if(n>arr.length-2){
+					n=0;
 				}
-			}
-			//碰撞检测
-			function duang(obj1,obj2){
-				var pos1 = obj1.getBoundingClientRect();
-				var pos2 = obj2.getBoundingClientRect();
-				if(pos1.right < pos2.left || pos1.bottom < pos2.top || pos1.left > pos2.right || pos1.top > pos2.bottom){
-					return false;
-				}else{
-					return true;
-				}
-			}
-			btn.onclick = function(){
+				n++;
 				for(var i=0;i<lis.length;i++){
-					arr.push({l:lis[i].l,t:lis[i].t});
+					lis[i].style.backgroundImage = 'url('+arr[n]+')';
+					if(Math.floor(i/10)%2 ==0){
+						lis[i].style.left =(i%10)*80-800+'px';
+					}else{
+						lis[i].style.left =(i%10)*80+800+'px';
+					}
+				}	
+					for(var i=0;i<lis.length;i++){
+						move(lis[i],'left',(i%10)*80,500)
+					}
+				
+			}
+			next.onclick = function(){
+				ul.style.backgroundImage = 'url('+arr[n]+')';
+				if(n<1){
+					n=arr.length;
 				}
-				arr.sort(function(a,b){
-					return Math.random()-0.5;
-				})
+				n--;
+
 				for(var i=0;i<lis.length;i++){
-					fn(lis[i],i);
-				}
-				arr = [];
-				function fn(obj,i){
-					move(obj,{left:arr[i].l,top:arr[i].t},500,'easeBoth',function(){
-						obj.l = obj.offsetLeft;
-						obj.t = obj.offsetTop;
-					});
-				}
+					lis[i].style.backgroundImage = 'url('+arr[n]+')';
+					if(Math.floor(i/10)%2 ==0){
+						lis[i].style.left =(i%10)*80-800+'px';
+					}else{
+						lis[i].style.left =(i%10)*80+800+'px';
+					}
+				}	
+					for(var i=0;i<lis.length;i++){
+						move(lis[i],'left',(i%10)*80,500)
+					}
 			}
 		</script>
 	</body>
